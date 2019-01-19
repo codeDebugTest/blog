@@ -153,7 +153,65 @@ config.plugin('env')
 ```
     
 ## 踩坑问题
-### 1. svg 文件始终会以URL的形式引入到项目中。
+### 1. less inline javascript
+**问题：Inline JavaScript is not enabled. Is it set in your options?**
+**原因：** less3.x以后的版本需要增加 **javascriptEnabled: true**
+**解决方案：**
+``` javascript
+    css: {
+        loaderOptions: {
+            less: {
+                javascriptEnabled: true
+            }
+        }
+    }
+```
+
+
+### 2. incorrect peerDependencies for vue-template-compiler
+**问题：** Error: [vue-loader] vue-template-compiler must be installed as a peer dependency, or a compatible compiler implementation must be passed via options.
+
+但是 vue-template-complier, vue-loader 都是已经安装了啊。并且vue-cli3 默认配置里面(config.module.rule)已经进行了如下配置：
+``` javascript
+    {
+        test: /\.vue$/,
+        use: [
+          {
+            loader: 'cache-loader',
+            options: {
+              cacheDirectory: 'xxx/node_modules/.cache/vue-loader',
+              cacheIdentifier: 'ab103f44'
+            }
+          },
+          {
+            loader: 'vue-loader',
+            options: {
+              compilerOptions: {
+                preserveWhitespace: false
+              },
+              cacheDirectory: 'xxx/node_modules/.cache/vue-loader',
+              cacheIdentifier: 'ab103f44'
+            }
+          }
+        ]
+      }
+```
+**原因：**经过在vue-loader github仓库发现有人提到了这个问题。并且尤大进行了解释：
+***You don't use it directly. However, its version must be the same with vue to ensure correct behavior. Making it a peer dep makes it possible to explicitly pin both vue and vue-template-compiler to the same version.*** 意思说 **vue 与 vue-template-complier 版本号不一致** [issue 详情](https://github.com/vuejs/vue-loader/issues/560)
+确实发现项目依赖vue 与 vue-template-complier 版本号不一致。保持一致问题就解决了。
+
+### 3. Parsing error: Adjacent JSX elements must be wrapped in an enclosing tag
+**原因：** 该问题是由于 eslint 配置："parser": "babel-eslint" 的位置不对。把此配置移入到 “parserOptions” 中即可。
+``` javascript
+  {
+      "root": true,
+-     "parser": "babel-eslint",
++     "parserOptions": {
++         "parser": "babel-eslint"
++     },
+```
+
+### 4. svg 文件始终会以URL的形式引入到项目中。
 需求 svg-inline-loader, svg-loader 分别对不同路径下的svg进行处理。
 最开始的配置是：
 ``` javascript
@@ -217,4 +275,118 @@ chainWebpack: config => {
         .loader('svg-inline-loader')
     }
 }
+```
+
+### 5. webpack optimization split chunk
+由于原项目最后打包体积过大（2M左右），因此在webpack2 使用了CommonsChunkPlugin 进行了代码分离。分离后的代码块不会变动可以被浏览器进行缓存。但是在webpack4 中该插件被移入到 optimization.splitChunks 中。默认状态下webpack4会基于以下条件，自动进行代码分离：
+> 分离的块可以被共享或者来自node_modules的模块
+> 分离的块必须大于 30Kb（minimize, gzip压缩前）
+> 根据需要加载块时的最大并行请求数将小于或等于5
+> 初始页面加载时的最大并行请求数将小于或等于3
+**为了满足最后两个条件，webpack有可能受限于包的最大数量值，生成的代码体积往上增加。**
+
+#### 配置
+> minSize(默认是30000， 30kb)：形成一个新代码块最小的体积
+> minChunks（默认是1）：在分割之前，这个代码块最小应该被引用的次数（译注：保证代码块复用性，默认配置的策略是不需要多次引用也可以被分割）
+> maxInitialRequests（默认是3）：一个入口最大的并行请求数
+> maxAsyncRequests（默认是5）：按需加载时候最大的并行请求数。
+> chunks的值应该是[all, async, initial]其中的一个。
+> **缓存组（Cache Group）**
+cacheGroup是最关键的配置上面那些参数可以不用管。
+cacheGroup 默认模式会将所有来自node_modules的模块分配到一个叫vendors的缓存组；所有重复引用至少两次的代码，会被分配到default的缓存组。一个模块可以被分配到多个缓存组，优化策略会将模块分配至跟高优先级别（priority）的缓存组，或者会分配至可以形成更大体积代码块的组里。
+
+
+
+### optimization split chunk 配置
+> 原始配置webpack2 如下：
+``` javascript
+new HtmlWebpackPlugin({
+    filename: 'index.html',
+    template: 'index.html',
+    inject: true,
+    minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeAttributeQuotes: true
+    },
+    chunks: ['vendor', 'quill', `app`],
+    // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+    chunksSortMode: 'dependency'
+})),
+new webpack.optimize.CommonsChunkPlugin({
+    name: 'vendor',
+    minChunks: function (module, count) {
+        // any required modules inside node_modules are extracted to vendor
+        return (
+            module.resource &&
+            /\.js$/.test(module.resource) &&
+            module.resource.indexOf(
+                path.join(__dirname, '../node_modules')
+            ) === 0 &&
+            module.resource.indexOf('quill') === -1 
+        );
+    }
+}),
+new webpack.optimize.CommonsChunkPlugin({
+    name: 'quill',
+    chunks: config.entries.map(({name}) => name)
+}),
+```
+
+> 最终配置： vue-cli3(webpack4)
+``` javascript
+// split chunks optimization when not 'development' mode
+config.when(process.env.NODE_ENV !== 'development', config => {
+    config.plugin('html')
+        .use(HtmlWebpackPlugin)
+        .tap(args => [{
+            filename: 'index.html',
+            template: 'public/index.html',
+            inject: true,
+            minify: {
+                removeComments: true,
+                collapseWhitespace: true,
+                removeAttributeQuotes: true
+            },
+            chunks: ['vendor', 'quill', 'app'],
+            // necessary to consistently work with multiple chunks via CommonsChunkPlugin
+            chunksSortMode: 'dependency'
+        }]);
+    // split chunks
+    config.optimization
+        .splitChunks({
+            cacheGroups: {
+                default: false,
+                vendor: {
+                    chunks: 'initial',
+                    name: 'vendor',
+                    test(module, count) {
+                        // any required modules inside node_modules are extracted to vendor
+                        return (
+                            module.resource
+                            && /\.js$/.test(module.resource)
+                            && module.resource.indexOf(
+                                path.join(__dirname, './node_modules')
+                            ) === 0
+                            && module.resource.indexOf('quill') === -1
+                            && module.resource.indexOf('lego-sdk') === -1
+                        );
+                    }
+                },
+                quill: {
+                    chunks: 'initial',
+                    name: 'quill',
+                    test(module, count) {
+                        return (
+                            module.resource
+                            && module.resource.indexOf(
+                                path.join(__dirname, './node_modules')
+                            ) === 0
+                            && module.resource.indexOf('quill') !== -1
+                        );
+                    }
+                }
+            }
+        });
+});
 ```
