@@ -279,22 +279,21 @@ chainWebpack: config => {
 
 ### 5. webpack optimization split chunk
 由于原项目最后打包体积过大（2M左右），因此在webpack2 使用了CommonsChunkPlugin 进行了代码分离。分离后的代码块不会变动可以被浏览器进行缓存。但是在webpack4 中该插件被移入到 optimization.splitChunks 中。默认状态下webpack4会基于以下条件，自动进行代码分离：
-> - 分离的块可以被共享或者来自node_modules的模块
-> - 分离的块必须大于 30Kb（minimize, gzip压缩前）
-> - 根据需要加载块时的最大并行请求数将小于或等于5
-> - 初始页面加载时的最大并行请求数将小于或等于3
-**为了满足最后两个条件，webpack有可能受限于包的最大数量值，生成的代码体积往上增加。**
+- 分离的块可以被共享或者来自node_modules的模块
+- 分离的块必须大于 30Kb（minimize, gzip压缩前）
+- 根据需要加载块时的最大并行请求数将小于或等于5
+- 初始页面加载时的最大并行请求数将小于或等于3
+> **为了满足最后两个条件，webpack有可能受限于包的最大数量值，生成的代码体积往上增加。**
 
 #### 配置
-> - minSize(默认是30000， 30kb)：形成一个新代码块最小的体积
-> - minChunks（默认是1）：在分割之前，这个代码块最小应该被引用的次数（译注：保证代码块复用性，默认配置的策略是不需要多次引用也可以被分割）
-> - maxInitialRequests（默认是3）：一个入口最大的并行请求数
-> - maxAsyncRequests（默认是5）：按需加载时候最大的并行请求数。
-> - chunks的值应该是[all, async, initial]其中的一个。
-> - **缓存组（Cache Group）**
+- minSize(默认是30000， 30kb)：形成一个新代码块最小的体积
+- minChunks（默认是1）：在分割之前，这个代码块最小应该被引用的次数（译注：保证代码块复用性，默认配置的策略是不需要多次引用也可以被分割）
+- maxInitialRequests（默认是3）：一个入口最大的并行请求数
+- maxAsyncRequests（默认是5）：按需加载时候最大的并行请求数。
+- chunks的值应该是[all, async, initial]其中的一个。
+- **缓存组（Cache Group）**
 cacheGroup是最关键的配置上面那些参数可以不用管。
-cacheGroup 默认模式会将所有来自node_modules的模块分配到一个叫vendors的缓存组；所有重复引用至少两次的代码，会被分配到default的缓存组。一个模块可以被分配到多个缓存组，优化策略会将模块分配至跟高优先级别（priority）的缓存组，或者会分配至可以形成更大体积代码块的组里。
-
+> cacheGroup 默认模式会将所有来自node_modules的模块分配到一个叫vendors的缓存组；所有重复引用至少两次的代码，会被分配到default的缓存组。一个模块可以被分配到多个缓存组，优化策略会将模块分配至跟高优先级别（priority）的缓存组，或者会分配至可以形成更大体积代码块的组里。
 
 
 ### optimization split chunk 配置
