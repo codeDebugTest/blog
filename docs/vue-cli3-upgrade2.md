@@ -1,6 +1,6 @@
 # vue老项目升级vue-cli3指南（三）：vue cli3打包优化
 
-## 利器 webpack-bundle-analyzer
+## webpack-bundle-analyzer
 工欲善其事，必先利其器。webpack有个插件，可以查看项目打包，每个包的体积，每个包里面的包一些情况: webpack-bundle-analyzer，借助此插件可进行打包分析。我们先看下怎样引入此插件。
 
 ### webpack配置(未使用 vue-cli3):
@@ -49,13 +49,13 @@
 ```javascript
     "analyze": "vue-cli-service build --mode analyze"
 ```
-[结合前一篇文章](https://github.com/codeDebugTest/blog/blob/master/docs/vue-cli3-upgrade.md)我们需要增加annalyze env文件配置. 添加.env.analyze文件，并添加如下内容
+[结合前一篇文章](https://github.com/codeDebugTest/blog/blob/master/docs/vue-cli3-upgrade.md)我们需要增加annalyze env文件配置。新增env.analyze文件，内容如下：
 ```javascript
 NODE_ENV=production
 OPEN_ANALYZE=true
 ```
 再次运行 npm run analyze 就可以查看项目打包状况：
-[ ](https://github.com/codeDebugTest/blog/blob/master/img/bundle-analyze.png)
+![](https://github.com/codeDebugTest/blog/blob/master/img/bundle-analyze.png)
 
 
 ## Moment.js
@@ -64,7 +64,7 @@ OPEN_ANALYZE=true
 1. IgnorePlugin
 2. ContextReplacementPlugin
 
-### using IgnorePlugin
+### IgnorePlugin
 在vue.config.js中进行如下配置，将移除掉所有语言包
 ```javascript
 configureWebpack: {
@@ -77,7 +77,7 @@ configureWebpack: {
 ```
 改方案也被使用在[create-react-app](https://github.com/facebook/create-react-app/blob/a0030fcf2df5387577ced165198f1f0264022fbd/packages/react-scripts/config/webpack.config.prod.js#L350-L355)中
 
-### Using ContextReplacementPlugin
+### ContextReplacementPlugin
 如果想保留某个语言包，可以使用ContextReplacementPlugin 在vue.config.js中进行如下配置：
 ```javascript
 const webpack = require('webpack');
@@ -112,7 +112,7 @@ configureWebpack: {
 | [dayjs](https://github.com/iamkun/dayjs) | 6.5k(2.6k) without plugins        | No           | 17k               | Medium           | OO         | Not yet               | 39     |
 
 #### References
-你不需要Moment.js [https://github.com/you-dont-need/You-Dont-Need-Momentjs.](https://github.com/you-dont-need/You-Dont-Need-Momentjs.) 
-移除语言包
+1. 你不需要Moment.js [https://github.com/you-dont-need/You-Dont-Need-Momentjs.](https://github.com/you-dont-need/You-Dont-Need-Momentjs.) 
+2. 移除语言包
  - [http://stackoverflow.com/questions/25384360/how-to-prevent-moment-js-from-loading-locales-with-webpack/37172595](http://stackoverflow.com/questions/25384360/how-to-prevent-moment-js-from-loading-locales-with-webpack/37172595)
  - [https://github.com/moment/moment/issues/2373](https://github.com/moment/moment/issues/2373)
