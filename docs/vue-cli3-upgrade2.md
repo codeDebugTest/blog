@@ -116,3 +116,4 @@ configureWebpack: {
 2. 移除语言包
  - [http://stackoverflow.com/questions/25384360/how-to-prevent-moment-js-from-loading-locales-with-webpack/37172595](http://stackoverflow.com/questions/25384360/how-to-prevent-moment-js-from-loading-locales-with-webpack/37172595)
  - [https://github.com/moment/moment/issues/2373](https://github.com/moment/moment/issues/2373)
+ 3. webpack optimize [https://github.com/jmblog/how-to-optimize-momentjs-with-webpack](https://github.com/jmblog/how-to-optimize-momentjs-with-webpack)
