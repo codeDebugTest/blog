@@ -112,7 +112,7 @@ configureWebpack: {
 | [dayjs](https://github.com/iamkun/dayjs) | 6.5k(2.6k) without plugins        | No           | 17k               | Medium           | OO         | Not yet               | 39     |
 
 #### References
-1. 你不需要Moment.js [https://github.com/you-dont-need/You-Dont-Need-Momentjs.](https://github.com/you-dont-need/You-Dont-Need-Momentjs.) 
+1. 你不需要Moment.js [https://github.com/you-dont-need/You-Dont-Need-Momentjs.](https://github.com/you-dont-need/You-Dont-Need-Momentjs) 
 2. 移除语言包
  - [http://stackoverflow.com/questions/25384360/how-to-prevent-moment-js-from-loading-locales-with-webpack/37172595](http://stackoverflow.com/questions/25384360/how-to-prevent-moment-js-from-loading-locales-with-webpack/37172595)
  - [https://github.com/moment/moment/issues/2373](https://github.com/moment/moment/issues/2373)
