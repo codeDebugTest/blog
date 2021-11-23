@@ -1,4 +1,4 @@
-# 翻译 - react code review React 日常十问
+# 翻译 - React code review React 日常十问
 
 ## 原文地址：[This Is My 10 Questions React Code Reviewing Routine](https://www.chakshunyu.com/blog/this-is-my-10-questions-react-code-reviewing-routine/)
 ## 原文作者：Chak Shun Yu
