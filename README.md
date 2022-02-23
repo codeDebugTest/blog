@@ -8,6 +8,7 @@
 - [vue老项目升级vue-cli3指南（二）：vue cli3 升级手册](https://github.com/codeDebugTest/blog/blob/master/docs/vue-cli3-upgrade.md)
 - [vue老项目升级vue-cli3指南（三）：vue cli3 打包优化](https://github.com/codeDebugTest/blog/blob/master/docs/vue-cli3-upgrade2.md)
 - [vue-cli3 模版插件开发指南](https://github.com/codeDebugTest/blog/blob/master/docs/vue-cli3-plugin.md)
+- [使用vue-cli 搭建 vue-ssr指南](https://github.com/codeDebugTest/blog/issues/4)
 
 ## todo
 * vue-cli 详解
